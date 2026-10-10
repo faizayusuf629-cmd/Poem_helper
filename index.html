@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poem Helper</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 16px;
+  background: #f6f3ff;
+  color: #292344;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+}
+
+header {
+  text-align: center;
+  padding: 20px 5px;
+}
+
+header h1 {
+  color: #7054d8;
+  font-size: 34px;
+  margin-bottom: 5px;
+}
+
+header p {
+  color: #6d6683;
+}
+
+.panel {
+  background: white;
+  border: 1px solid #e5defa;
+  border-radius: 16px;
+  padding: 18px;
+  margin: 16px 0;
+  box-shadow: 0 4px 14px #30205b0b;
+}
+
+h2 {
+  color: #5d43bd;
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin: 12px 0 6px;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d8d0ee;
+  border-radius: 9px;
+  font-size: 16px;
+  background: white;
+  color: #292344;
+}
+
+textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+button {
+  background: #7054d8;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  padding: 12px 15px;
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #eee8ff;
+  color: #5036a8;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 18px 0;
+}
+
+.tabs button {
+  flex: 1 1 120px;
+  margin: 0;
+}
+
+.tabs button.active {
+  background: #402b9d;
+}
+
+.tool {
+  display: none;
+}
+
+.tool.active {
+  display: block;
+}
+
+.output {
+  background: #faf9ff;
+  border: 1px solid #e5defa;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 14px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  min-height: 50px;
+}
+
+.status {
+  color: #6d6683;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.error {
+  color: #b42318;
+}
+
+.success {
+  color: #177245;
+}
+
+.small {
+  font-size: 13px;
+  color: #6d6683;
+}
+
+.quiz-question {
+  border: 1px solid #e5defa;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.quiz-question p {
+  font-weight: bold;
+}
+
+.quiz-question label {
+  font-weight: normal;
+}
+
+.quiz-question input {
+  width: auto;
+  margin-right: 8px;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #6d6683;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Poem Helper</h1>
+  <p>Understand poetry, explore meanings, and create something wonderful.</p>
+</header>
+
+<main>
+
+<section class="panel">
+  <h2>Connect your AI</h2>
+
+  <p class="small">
+    Enter your Render backend URL below.
+    Never enter your secret API key here.
+  </p>
+
+  <label for="backendUrl">Backend URL</label>
+
+  <input
+    id="backendUrl"
+    type="url"
+    placeholder="https://your-backend.onrender.com"
+  >
+
+  <button id="saveUrl" type="button">
+    Save Backend URL
+  </button>
+
+  <button id="testUrl" class="secondary" type="button">
+    Test Connection
+  </button>
+
+  <div id="connectionStatus" class="status">
+    Backend not connected yet.
+  </div>
+
+  <p class="small">
+    Your API balance is currently zero, so online AI requests
+    may not work until credits are available.
+  </p>
+</section>
+
+<nav class="tabs">
+  <button class="active" data-tab="analyze" type="button">
+    Analyze Poem
+  </button>
+
+  <button data-tab="simplify" type="button">
+    Simplify Poem
+  </button>
+
+  <button data-tab="poem" type="button">
+    Generate Poem
+  </button>
+
+  <button data-tab="story" type="button">
+    Story Generator
+  </button>
+
+  <button data-tab="quiz" type="button">
+    Poetry Quiz
+  </button>
+</nav>
+
+<section class="panel tool active" id="analyze">
+  <h2>Deep Poem Analysis</h2>
+
+  <p>
+    Explore the meaning, themes, emotions, imagery,
+    symbolism, and literary devices in a poem.
+  </p>
+
+  <label for="analysisTitle">Poem Title (optional)</label>
+
+  <input id="analysisTitle" placeholder="Enter the poem title">
+
+  <label for="analysisPoem">Your Poem</label>
+
+  <textarea
+    id="analysisPoem"
+    placeholder="Paste the poem you want to understand..."
+  ></textarea>
+
+  <button id="analyzeBtn" type="button">
+    Analyze My Poem
+  </button>
+
+  <button id="clearAnalysis" class="secondary" type="button">
+    Clear
+  </button>
+
+  <div id="analysisStatus" class="status"></div>
+
+  <div id="analysisOutput" class="output">
+    Your poem analysis will appear here.
+  </div>
+</section>
+
+<section class="panel tool" id="simplify">
+  <h2>Poem Simplifier</h2>
+
+  <p>
+    Break a poem into manageable lines and get questions
+    that help you understand its meaning.
+  </p>
+
+  <label for="simplePoem">Paste Your Poem</label>
+
+  <textarea
+    id="simplePoem"
+    placeholder="Paste your poem here..."
+  ></textarea>
+
+  <button id="simplifyBtn" type="button">
+    Simplify My Poem
+  </button>
+
+  <button id="clearSimple" class="secondary" type="button">
+    Clear
+  </button>
+
+  <div id="simpleOutput" class="output">
+    Your reading guide will appear here.
+  </div>
+</section>
+<!-- POEM GENERATOR -->
+<section class="panel tool" id="poem">
+
+  <h2>Generate Your Own Poem</h2>
+
+  <p>Turn your ideas and feelings into original poetry.</p>
+
+  <label for="poemTopic">What should your poem be about?</label>
+
+  <input
+    id="poemTopic"
+    placeholder="Example: Hope, friendship, or courage"
+  >
+
+  <label for="poemMood">Choose a mood</label>
+
+  <select id="poemMood">
+    <option value="hopeful">Hopeful</option>
+    <option value="happy">Happy</option>
+    <option value="thoughtful">Thoughtful</option>
+    <option value="peaceful">Peaceful</option>
+    <option value="mysterious">Mysterious</option>
+    <option value="sad but hopeful">Sad but hopeful</option>
+    <option value="adventurous">Adventurous</option>
+    <option value="funny">Funny</option>
+  </select>
+
+  <label for="poemLength">Poem length</label>
+
+  <select id="poemLength">
+    <option value="short">Short</option>
+    <option value="medium" selected>Medium</option>
+    <option value="long">Long</option>
+  </select>
+
+  <button id="poemBtn" type="button">
+    Generate My Poem
+  </button>
+
+  <div id="poemStatus" class="status"></div>
+
+  <div id="poemOutput" class="output">
+    Your original poem will appear here.
+  </div>
+
+</section>
+
+
+<!-- STORY GENERATOR -->
+<section class="panel tool" id="story">
+
+  <h2>Story Generator</h2>
+
+  <p>Choose a story idea and create an adventure.</p>
+
+  <label for="storyTopic">Choose your story topic</label>
+
+  <select id="storyTopic">
+    <option value="a hidden library full of mysterious books">
+      1. The Hidden Library
+    </option>
+
+    <option value="a friendship tested during a school competition">
+      2. The School Competition
+    </option>
+
+    <option value="a mysterious letter that changes someone's life">
+      3. The Mysterious Letter
+    </option>
+
+    <option value="a young inventor who creates something extraordinary">
+      4. The Young Inventor
+    </option>
+
+    <option value="an adventure through an enchanted forest">
+      5. The Enchanted Forest
+    </option>
+
+    <option value="a family that works together to solve a problem">
+      6. Family Teamwork
+    </option>
+
+    <option value="a lost object that leads to a surprising discovery">
+      7. The Lost Object
+    </option>
+
+    <option value="a brave young person helping their community">
+      8. A Brave Choice
+    </option>
+
+    <option value="a time-travelling adventure through history">
+      9. A Journey Through Time
+    </option>
+
+    <option value="an ordinary day that becomes extraordinary">
+      10. An Unusual Day
+    </option>
+  </select>
+
+  <label for="storyExtra">Extra details (optional)</label>
+
+  <input
+    id="storyExtra"
+    placeholder="Character names, setting, or other ideas"
+  >
+
+  <label for="storyMood">Story mood</label>
+
+  <select id="storyMood">
+    <option value="adventurous">Adventurous</option>
+    <option value="funny">Funny</option>
+    <option value="mysterious">Mysterious</option>
+    <option value="heartwarming">Heartwarming</option>
+    <option value="inspiring">Inspiring</option>
+    <option value="magical">Magical</option>
+  </select>
+
+  <label for="storyLength">Story length</label>
+
+  <select id="storyLength">
+    <option value="short">Short</option>
+    <option value="medium" selected>Medium</option>
+    <option value="long">Long</option>
+  </select>
+
+  <button id="storyBtn" type="button">
+    Generate My Story
+  </button>
+
+  <div id="storyStatus" class="status"></div>
+
+  <div id="storyOutput" class="output">
+    Your story will appear here.
+  </div>
+
+</section>
+
+
+<!-- POETRY QUIZ -->
+<section class="panel tool" id="quiz">
+
+  <h2>Poetry Quiz</h2>
+
+  <p>
+    Test your knowledge of poetry, literary devices,
+    and poetic language.
+  </p>
+
+  <div id="quizArea"></div>
+
+  <button id="gradeQuiz" type="button">
+    Check My Answers
+  </button>
+
+  <button id="retakeQuiz" class="secondary" type="button">
+    Retake Quiz
+  </button>
+
+  <div id="quizResult" class="output">
+    Your score will appear here.
+  </div>
+
+</section>
+
+
+<footer>
+  <p>Poem Helper</p>
+  <p>Read deeply. Think creatively. Write fearlessly.</p>
+</footer>
+<script>
+const backendInput = document.getElementById("backendUrl");
+const connectionStatus = document.getElementById("connectionStatus");
+
+const savedUrl = localStorage.getItem("poemHelperBackend");
+
+if (savedUrl) {
+  backendInput.value = savedUrl;
+}
+
+function getBackendUrl() {
+  return backendInput.value.trim().replace(/\/+$/, "");
+}
+
+document.getElementById("saveUrl").addEventListener("click", function () {
+  const url = getBackendUrl();
+
+  if (!url.startsWith("https://")) {
+    connectionStatus.textContent =
+      "Please enter your secure Render URL.";
+    connectionStatus.className = "status error";
+    return;
+  }
+
+  localStorage.setItem("poemHelperBackend", url);
+
+  connectionStatus.textContent = "Backend URL saved.";
+  connectionStatus.className = "status success";
+});
+
+document.getElementById("testUrl").addEventListener("click", async function () {
+  const url = getBackendUrl();
+
+  if (!url.startsWith("https://")) {
+    connectionStatus.textContent =
+      "Enter your Render URL first.";
+    connectionStatus.className = "status error";
+    return;
+  }
+
+  connectionStatus.textContent = "Testing connection...";
+  connectionStatus.className = "status";
+
+  try {
+    const response = await fetch(url);
+    const message = await response.text();
+
+    if (response.ok && message.includes("backend is running")) {
+      localStorage.setItem("poemHelperBackend", url);
+      connectionStatus.textContent =
+        "Backend is online. URL saved.";
+      connectionStatus.className = "status success";
+    } else {
+      throw new Error("Unexpected backend response.");
+    }
+  } catch (error) {
+    connectionStatus.textContent =
+      "Could not test the connection. We may need to fix a backend setting next.";
+    connectionStatus.className = "status error";
+  }
+});
+
+document.querySelectorAll(".tabs button").forEach(function (button) {
+  button.addEventListener("click", function () {
+    document.querySelectorAll(".tabs button").forEach(function (tab) {
+      tab.classList.remove("active");
+    });
+
+    document.querySelectorAll(".tool").forEach(function (panel) {
+      panel.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    const panel = document.getElementById(button.dataset.tab);
+
+    if (panel) {
+      panel.classList.add("active");
+    }
+  });
+});
+
+function showStatus(id, message, type = "") {
+  const element = document.getElementById(id);
+  element.textContent = message;
+  element.className = "status " + type;
+}
+
+function showOutput(id, message) {
+  document.getElementById(id).textContent = message;
+}
+
+async function askAI(data, statusId, outputId, buttonId) {
+  const url = getBackendUrl();
+  const button = document.getElementById(buttonId);
+
+  if (!url) {
+    showStatus(
+      statusId,
+      "Please enter and save your Render backend URL first.",
+      "error"
+    );
+    return;
+  }
+
+  button.disabled = true;
+  showStatus(statusId, "Working on it. Please wait...");
+
+  try {
+    const response = await fetch(url + "/api/ai", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "The request failed.");
+    }
+
+    showOutput(outputId, result.result || "No result was returned.");
+    showStatus(statusId, "Done!", "success");
+
+  } catch (error) {
+    showStatus(
+      statusId,
+      "It couldn't connect or complete the request. We may need to fix the backend connection or check the API account.",
+      "error"
+    );
+  } finally {
+    button.disabled = false;
+  }
+}
+</script>
+<script>
+// ANALYZE A POEM
+document.getElementById("analyzeBtn").addEventListener("click", function () {
+  const title = document.getElementById("analysisTitle").value.trim();
+  const poem = document.getElementById("analysisPoem").value.trim();
+
+  if (!poem) {
+    showStatus("analysisStatus", "Please paste a poem first.", "error");
+    return;
+  }
+
+  askAI(
+    {
+      task: "analyze",
+      topic: title || "Analyze this poem",
+      poem: poem
+    },
+    "analysisStatus",
+    "analysisOutput",
+    "analyzeBtn"
+  );
+});
+
+document.getElementById("clearAnalysis").addEventListener("click", function () {
+  document.getElementById("analysisTitle").value = "";
+  document.getElementById("analysisPoem").value = "";
+  showOutput("analysisOutput", "Your analysis will appear here.");
+  showStatus("analysisStatus", "");
+});
+
+
+// SIMPLIFY A POEM
+document.getElementById("simplifyBtn").addEventListener("click", function () {
+  const poem = document.getElementById("simplePoem").value.trim();
+
+  if (!poem) {
+    showOutput("simpleOutput", "Please paste a poem first.");
+    return;
+  }
+
+  const lines = poem.split("\n").filter(line => line.trim() !== "");
+
+  let result = "POEM READING GUIDE\n\n";
+
+  result += "Read each line carefully. Use the questions below to work out its meaning.\n\n";
+
+  lines.forEach(function (line, index) {
+    result += "Line " + (index + 1) + ": " + line.trim() + "\n";
+    result += "In simpler words: Write what you think this line means.\n";
+    result += "Clue: Look for important words, comparisons, feelings, or images.\n\n";
+  });
+
+  result += "QUESTIONS TO HELP YOU UNDERSTAND THE POEM\n\n";
+  result += "1. What is the poem mainly about?\n";
+  result += "2. Who might be speaking in the poem?\n";
+  result += "3. What feelings does the poem express?\n";
+  result += "4. Are there any metaphors, similes, or symbols?\n";
+  result += "5. What message might the poet want readers to understand?\n\n";
+  result += "Note: This is a reading guide, not an AI-generated explanation.";
+
+  showOutput("simpleOutput", result);
+});
+
+document.getElementById("clearSimple").addEventListener("click", function () {
+  document.getElementById("simplePoem").value = "";
+  showOutput("simpleOutput", "Your reading guide will appear here.");
+});
+
+
+// GENERATE A POEM
+document.getElementById("poemBtn").addEventListener("click", function () {
+  const topic = document.getElementById("poemTopic").value.trim();
+  const mood = document.getElementById("poemMood").value;
+  const length = document.getElementById("poemLength").value;
+
+  if (!topic) {
+    showStatus("poemStatus", "Please enter a topic for your poem.", "error");
+    return;
+  }
+
+  askAI(
+    {
+      task: "poem",
+      topic: topic,
+      mood: mood,
+      length: length
+    },
+    "poemStatus",
+    "poemOutput",
+    "poemBtn"
+  );
+});
+
+
+// GENERATE A STORY
+document.getElementById("storyBtn").addEventListener("click", function () {
+  const selectedTopic = document.getElementById("storyTopic").value;
+  const extra = document.getElementById("storyExtra").value.trim();
+  const mood = document.getElementById("storyMood").value;
+  const length = document.getElementById("storyLength").value;
+
+  const topic = extra
+    ? selectedTopic + ". Additional details: " + extra
+    : selectedTopic;
+
+  askAI(
+    {
+      task: "story",
+      topic: topic,
+      mood: mood,
+      length: length
+    },
+    "storyStatus",
+    "storyOutput",
+    "storyBtn"
+  );
+});
+
+
+// POETRY QUIZ
+const quizQuestions = [
+  {
+    question: "1. What is a group of lines in a poem called?",
+    options: ["A paragraph", "A stanza", "A chapter", "A scene"],
+    answer: 1
+  },
+  {
+    question: "2. Which sentence contains a simile?",
+    options: [
+      "The stars danced.",
+      "Time is a thief.",
+      "Her smile was like sunshine.",
+      "The wind whispered."
+    ],
+    answer: 2
+  },
+  {
+    question: "3. What is a metaphor?",
+    options: [
+      "A direct comparison",
+      "A repeated sound",
+      "A type of rhyme",
+      "A question"
+    ],
+    answer: 0
+  },
+  {
+    question: "4. What is the mood of a poem?",
+    options: [
+      "Its number of lines",
+      "The feeling it creates",
+      "The poet's full name",
+      "Its title only"
+    ],
+    answer: 1
+  },
+  {
+    question: "5. What is rhyme?",
+    options: [
+      "Words with similar ending sounds",
+      "A long paragraph",
+      "A hidden character",
+      "A type of setting"
+    ],
+    answer: 0
+  },
+  {
+    question: "6. What is personification?",
+    options: [
+      "Making every line rhyme",
+      "Giving human qualities to non-human things",
+      "Writing a very long poem",
+      "Repeating a title"
+    ],
+    answer: 1
+  },
+  {
+    question: "7. What is the theme of a poem?",
+    options: [
+      "Its page colour",
+      "Its line length",
+      "Its central idea or message",
+      "Its punctuation"
+    ],
+    answer: 2
+  },
+  {
+    question: "8. Which is an example of onomatopoeia?",
+    options: [
+      "Beautiful",
+      "Buzz",
+      "Gentle",
+      "Quiet"
+    ],
+    answer: 1
+  }
+];
+
+function buildQuiz() {
+  const area = document.getElementById("quizArea");
+  area.textContent = "";
+
+  quizQuestions.forEach(function (item, index) {
+    const box = document.createElement("div");
+    box.className = "quiz-question";
+
+    const heading = document.createElement("p");
+    heading.textContent = item.question;
+    box.appendChild(heading);
+
+    item.options.forEach(function (option, optionIndex) {
+      const label = document.createElement("label");
+      label.style.display = "block";
+      label.style.margin = "8px 0";
+
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "question" + index;
+      radio.value = optionIndex;
+
+      label.appendChild(radio);
+      label.appendChild(document.createTextNode(" " + option));
+      box.appendChild(label);
+    });
+
+    area.appendChild(box);
+  });
+
+  showOutput("quizResult", "Choose your answers, then check your score.");
+}
+
+document.getElementById("gradeQuiz").addEventListener("click", function () {
+  let score = 0;
+  let answered = 0;
+
+  quizQuestions.forEach(function (item, index) {
+    const selected = document.querySelector(
+      'input[name="question' + index + '"]:checked'
+    );
+
+    if (selected) {
+      answered++;
+
+      if (Number(selected.value) === item.answer) {
+        score++;
+      }
+    }
+  });
+
+  showOutput(
+    "quizResult",
+    "Your score: " + score + " out of " + quizQuestions.length +
+    "\nQuestions answered: " + answered + " out of " + quizQuestions.length +
+    "\n\n" + (score === quizQuestions.length
+      ? "Excellent work! You got every question correct."
+      : "Good effort! Retake the quiz to practise again.")
+  );
+});
+
+document.getElementById("retakeQuiz").addEventListener("click", buildQuiz);
+
+buildQuiz();
+</script>
+
+</main>
+</body>
+</html>
